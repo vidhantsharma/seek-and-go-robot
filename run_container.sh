@@ -20,6 +20,10 @@ xhost +local:docker >/dev/null
 echo "[INFO] Building Docker image: ${IMAGE_NAME}"
 ${DOCKER_CMD} build -t ${IMAGE_NAME} .
 
+# ROS / DDS settings (change ROS_DOMAIN_ID to match host)
+ROS_DOMAIN_ID=42
+RMW_IMPL=rmw_cyclonedds_cpp
+
 # Run the container
 echo "[INFO] Starting container: ${CONTAINER_NAME}"
 ${DOCKER_CMD} run -it \
@@ -27,6 +31,11 @@ ${DOCKER_CMD} run -it \
   --net=host \
   -e DISPLAY=$DISPLAY \
   -e QT_X11_NO_MITSHM=1 \
+  -e ROS_DOMAIN_ID=${ROS_DOMAIN_ID} \
+  -e RMW_IMPLEMENTATION=${RMW_IMPL} \
+  -e SDL_AUDIODRIVER=dummy \
+  -e AUDIODEV=null \
+  -e XDG_RUNTIME_DIR=/tmp/runtime-root \
   -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
   --device /dev/dri:/dev/dri \
   --name ${CONTAINER_NAME} \

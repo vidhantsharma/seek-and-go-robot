@@ -18,6 +18,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-robot-state-publisher \
     ros-humble-joint-state-publisher \
     ros-humble-xacro \
+    ros-humble-rmw-cyclonedds-cpp \
+    ros-humble-rmw-fastrtps-cpp \
     git \
     wget \
     xterm \
@@ -49,6 +51,12 @@ RUN . /opt/ros/humble/setup.sh && colcon build --symlink-install
 # Add an entrypoint that sources ROS and the workspace overlay
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
+
+
+ENV SDL_AUDIODRIVER=dummy
+ENV AUDIODEV=null
+
+ENV ROS_DOMAIN_ID=42
 
 # small helpful default
 ENV LANG=C.UTF-8

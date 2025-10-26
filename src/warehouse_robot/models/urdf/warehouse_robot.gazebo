@@ -124,6 +124,8 @@
         <topicName>scan</topicName>
         <frameName>hokuyo</frameName>
         <updateRate>40</updateRate>
+
+        <output_type>sensor_msgs/PointCloud2</output_type>
       </plugin>
     </sensor>
   </gazebo>
