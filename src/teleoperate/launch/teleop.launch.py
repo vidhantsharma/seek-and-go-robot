@@ -8,12 +8,15 @@ def generate_launch_description():
             executable='teleop_twist_keyboard',
             name='teleop_keyboard',
             output='screen',
-            prefix='xterm -e',  # opens a new terminal window for keyboard input (optional)
+            emulate_tty=True,          # allocate a pty so it can read stdin
+            prefix='xterm -e',         # optional: opens it in a new xterm (remove if you don't want a new window)
             remappings=[
-                ('/cmd_vel', '/cmd_vel'),  # keep same topic name
+                ('cmd_vel', '/cmd_vel'),  # map the node's 'cmd_vel' to absolute '/cmd_vel'
             ],
             parameters=[
-                {'use_sim_time': True}
-            ]
+                {'use_sim_time': True},
+                {'speed': 0.1},         # ← default linear speed
+                {'turn': 0.1},          # ← default angular speed
+            ],
         )
     ])
