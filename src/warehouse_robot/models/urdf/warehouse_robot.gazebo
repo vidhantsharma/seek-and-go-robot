@@ -1,0 +1,172 @@
+<?xml version="1.0"?>
+<robot>
+
+  <gazebo reference="camera_link">
+    <material>Gazebo/Grey</material>
+  </gazebo>
+
+  <gazebo reference="left_wheel">
+    <material>Gazebo/Indigo</material>
+  </gazebo>
+
+  <gazebo reference="right_wheel">
+    <material>Gazebo/Indigo</material>
+  </gazebo>
+
+  <gazebo reference="base_chassis">
+    <material>Gazebo/DarkGrey</material>
+  </gazebo>
+
+  <gazebo reference="front_left_caster">
+    <material>Gazebo/White</material>
+  </gazebo>
+
+  <gazebo reference="front_right_caster">
+    <material>Gazebo/White</material>
+  </gazebo>
+
+  <gazebo reference="back_left_caster">
+    <material>Gazebo/White</material>
+  </gazebo>
+
+  <gazebo reference="back_right_caster">
+    <material>Gazebo/White</material>
+  </gazebo>
+
+  <!-- RGBD Camera using gazebo_ros camera plugin (ROS2 friendly) -->
+  <gazebo reference="camera_link">
+    <sensor type="depth" name="camera1">
+      <always_on>1</always_on>
+      <update_rate>20.0</update_rate>
+      <visualize>true</visualize>
+      <camera>
+        <horizontal_fov>1.047</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <depth_camera/>
+        <clip>
+          <near>0.1</near>
+          <far>20</far>
+        </clip>
+      </camera>
+
+      <!-- Use Gazebo ROS camera plugin (libgazebo_ros_camera.so) -->
+      <plugin name="gazebo_ros_camera" filename="libgazebo_ros_camera.so">
+        <!-- optional ROS namespace -->
+        <ros>
+          <namespace></namespace>
+        </ros>
+
+        <!-- Common camera plugin params (names used by gazebo_plugins) -->
+        <cameraName>camera</cameraName>
+        <frameName>camera_link_optical</frameName>
+        <imageTopicName>rgb/image_raw</imageTopicName>
+        <cameraInfoTopicName>rgb/camera_info</cameraInfoTopicName>
+        <depthImageTopicName>depth/image_raw</depthImageTopicName>
+        <depthImageCameraInfoTopicName>depth/camera_info</depthImageCameraInfoTopicName>
+        <pointCloudTopicName>depth/points</pointCloudTopicName>
+
+        <!-- tuning -->
+        <alwaysOn>true</alwaysOn>
+        <updateRate>20.0</updateRate>
+        <pointCloudCutoff>0.4</pointCloudCutoff>
+        <hackBaseline>0.07</hackBaseline>
+
+        <!-- distortion/focal fields left as defaults; if needed, set proper values -->
+        <distortionK1>0.0</distortionK1>
+        <distortionK2>0.0</distortionK2>
+        <distortionK3>0.0</distortionK3>
+        <distortionT1>0.0</distortionT1>
+        <distortionT2>0.0</distortionT2>
+        <CxPrime>0.0</CxPrime>
+        <Cx>0.0</Cx>
+        <Cy>0.0</Cy>
+        <focalLength>0.0</focalLength>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!-- hokuyo (laser) sensor using gazebo_ros laser plugin -->
+  <gazebo reference="hokuyo">
+    <sensor type="ray" name="head_hokuyo_sensor">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>false</visualize>
+      <update_rate>40</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>720</samples>
+            <resolution>1</resolution>
+            <min_angle>-1.570796</min_angle>
+            <max_angle>1.570796</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.10</min>
+          <max>30.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+
+      <!-- Use the gazebo_ros laser plugin (libgazebo_ros_laser.so) -->
+      <plugin name="gazebo_ros_head_hokuyo_controller" filename="libgazebo_ros_ray_sensor.so">
+        <ros>
+          <namespace></namespace>
+        </ros>
+        <topicName>scan</topicName>
+        <frameName>hokuyo</frameName>
+        <updateRate>40</updateRate>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!-- Differential drive plugin (gazebo_ros_diff_drive) -->
+  <gazebo>
+    <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
+      <ros>
+        <namespace></namespace>
+      </ros>
+
+      <legacyMode>false</legacyMode>
+      <alwaysOn>true</alwaysOn>
+      <updateRate>50</updateRate>
+
+      <!-- joints should match names in your URDF (they already do) -->
+      <!-- <leftJoint>left_wheel_hinge</leftJoint>
+      <rightJoint>right_wheel_hinge</rightJoint> -->
+      <left_joint>left_wheel_hinge</left_joint>
+      <right_joint>right_wheel_hinge</right_joint>
+
+      <!-- <wheelSeparation>0.43</wheelSeparation>
+      <wheelDiameter>0.16</wheelDiameter> -->
+      <wheel_separation>0.43</wheel_separation>
+      <wheel_diameter>0.16</wheel_diameter>
+      <torque>20</torque>
+
+      <!-- topics (no leading slash here; gazebo_ros plugin will publish under namespace) -->
+      <commandTopic>cmd_vel</commandTopic>
+      <odometryTopic>odom</odometryTopic>
+
+      <odometryFrame>odom</odometryFrame>
+      <robotBaseFrame>robot_footprint</robotBaseFrame>
+
+      <publishWheelTF>false</publishWheelTF>
+      <publishWheelJointState>false</publishWheelJointState>
+
+      <wheelAcceleration>1.0</wheelAcceleration>
+      <wheelTorque>20</wheelTorque>
+      <odometrySource>world</odometrySource>
+      <publishTf>1</publishTf>
+      <publishOdomTF>true</publishOdomTF>
+    </plugin>
+  </gazebo>
+
+</robot>

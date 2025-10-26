@@ -1,0 +1,8 @@
+# ignore build, install and logs
+build/
+install/
+log/
+
+# ignore .vscode
+.vscode/
+
