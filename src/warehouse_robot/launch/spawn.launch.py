@@ -26,7 +26,6 @@ def generate_launch_description():
     meshes_dir = PathJoinSubstitution([pkg_share, 'models', 'meshes'])
 
     # Build the xacro command and pass meshes_dir:=<absolute path>
-    # Note: spaces in the list are intentional so the substitution builds a single command string.
     robot_description_command = Command([
         FindExecutable(name='xacro'), ' ', xacro_file, ' ', 'meshes_dir:=', meshes_dir
     ])
@@ -50,4 +49,28 @@ def generate_launch_description():
         arguments=['-topic', 'robot_description', '-entity', 'warehouse_robot']
     )
 
-    return LaunchDescription([gz, robot_state_pub, spawn])
+    world_to_map_tf = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='world_origin_tf',
+        arguments=['0','0','0','0','0','0','world','map']
+      )
+    
+    map_to_odom_tf = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='world_origin_tf',
+        arguments=['0','0','0','0','0','0','map','odom']
+      )
+
+    # --- Bridge node: subscribes to /warehouse_robot/scan, publishes /warehouse_robot/pointcloud and /warehouse_robot/odom
+    warehouse_bridge = Node(
+        package='warehouse_robot',
+        executable='warehouse_bridge',
+        name='warehouse_bridge',
+        output='screen',
+        # Keep in global namespace; node explicitly uses the fully-qualified topic names.
+        # If you prefer namespace scoping, adjust topics in the C++ node or add 'namespace' argument here.
+    )
+
+    return LaunchDescription([gz, robot_state_pub, spawn, world_to_map_tf, map_to_odom_tf, warehouse_bridge])
