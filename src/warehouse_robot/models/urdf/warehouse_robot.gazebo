@@ -35,9 +35,9 @@
 
   <!-- RGBD Camera using gazebo_ros camera plugin (ROS2 friendly) -->
   <gazebo reference="camera_link">
-    <sensor type="depth" name="camera1">
+    <sensor type="depth" name="camera">
       <always_on>1</always_on>
-      <update_rate>20.0</update_rate>
+      <update_rate>30.0</update_rate>
       <visualize>true</visualize>
       <camera>
         <horizontal_fov>1.047</horizontal_fov>
@@ -51,13 +51,18 @@
           <near>0.1</near>
           <far>20</far>
         </clip>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.007</stddev>
+        </noise>
       </camera>
 
       <!-- Use Gazebo ROS camera plugin (libgazebo_ros_camera.so) -->
       <plugin name="gazebo_ros_camera" filename="libgazebo_ros_camera.so">
         <!-- optional ROS namespace -->
         <ros>
-          <namespace></namespace>
+          <namespace>/warehouse_robot</namespace>
         </ros>
 
         <!-- Common camera plugin params (names used by gazebo_plugins) -->
@@ -71,7 +76,7 @@
 
         <!-- tuning -->
         <alwaysOn>true</alwaysOn>
-        <updateRate>20.0</updateRate>
+        <updateRate>30.0</updateRate>
         <pointCloudCutoff>0.4</pointCloudCutoff>
         <hackBaseline>0.07</hackBaseline>
 
@@ -94,7 +99,7 @@
     <sensor type="ray" name="head_hokuyo_sensor">
       <pose>0 0 0 0 0 0</pose>
       <visualize>false</visualize>
-      <update_rate>40</update_rate>
+      <update_rate>10</update_rate>
       <ray>
         <scan>
           <horizontal>
@@ -119,13 +124,20 @@
       <!-- Use the gazebo_ros laser plugin (libgazebo_ros_laser.so) -->
       <plugin name="gazebo_ros_head_hokuyo_controller" filename="libgazebo_ros_ray_sensor.so">
         <ros>
-          <namespace></namespace>
+          <!-- ROS namespace -->
+          <namespace>/warehouse_robot</namespace>
+          <!-- Re-mapping of the output topic -->
+          <remapping>~/out:=/warehouse_robot/scan</remapping>
         </ros>
+
+        <!-- publish /scan -->
         <topicName>scan</topicName>
         <frameName>hokuyo</frameName>
         <updateRate>40</updateRate>
+        <min_intensity>0.0</min_intensity>
 
-        <output_type>sensor_msgs/PointCloud2</output_type>
+        <!-- publish LaserScan, not PointCloud2 -->
+        <output_type>sensor_msgs/LaserScan</output_type>
       </plugin>
     </sensor>
   </gazebo>
@@ -136,10 +148,6 @@
       <ros>
         <namespace></namespace>
       </ros>
-
-      <legacyMode>false</legacyMode>
-      <alwaysOn>true</alwaysOn>
-      <updateRate>50</updateRate>
 
       <!-- joints should match names in your URDF (they already do) -->
       <!-- <leftJoint>left_wheel_hinge</leftJoint>
@@ -154,20 +162,21 @@
       <torque>20</torque>
 
       <!-- topics (no leading slash here; gazebo_ros plugin will publish under namespace) -->
-      <commandTopic>cmd_vel</commandTopic>
-      <odometryTopic>odom</odometryTopic>
+      <command_topic>cmd_vel</command_topic>
+      <odometry_topic>odom</odometry_topic>
+      <odometry_frame>odom</odometry_frame>
+      <robot_base_frame>robot_footprint</robot_base_frame>
 
-      <odometryFrame>odom</odometryFrame>
-      <robotBaseFrame>robot_footprint</robotBaseFrame>
+      <!-- odometry -->
+      <publish_odom>true</publish_odom>
+      <publish_odom_tf>true</publish_odom_tf>
+      <publish_wheel_tf>false</publish_wheel_tf>
+      <odometry_rate>50.0</odometry_rate>
 
-      <publishWheelTF>false</publishWheelTF>
-      <publishWheelJointState>false</publishWheelJointState>
+      <!-- limits -->
+      <max_wheel_torque>20</max_wheel_torque>
+      <max_wheel_acceleration>1.0</max_wheel_acceleration>
 
-      <wheelAcceleration>1.0</wheelAcceleration>
-      <wheelTorque>20</wheelTorque>
-      <odometrySource>world</odometrySource>
-      <publishTf>1</publishTf>
-      <publishOdomTF>true</publishOdomTF>
     </plugin>
   </gazebo>
 

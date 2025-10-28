@@ -9,6 +9,10 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)                # if you later add C++ nodes
 find_package(robot_state_publisher REQUIRED)
 find_package(gazebo_ros REQUIRED)            # Gazebo integration
+find_package(sensor_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
 
 # NOTE: xacro is a Python package — no need for find_package(xacro)
 
@@ -38,5 +42,13 @@ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/include")
     DESTINATION include/
   )
 endif()
+
+add_executable(warehouse_bridge src/warehouse_bridge.cpp)
+ament_target_dependencies(warehouse_bridge rclcpp sensor_msgs nav_msgs geometry_msgs std_msgs)
+
+install(TARGETS
+  warehouse_bridge
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 ament_package()
