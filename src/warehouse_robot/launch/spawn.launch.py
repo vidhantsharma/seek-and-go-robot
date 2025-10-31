@@ -63,14 +63,14 @@ def generate_launch_description():
         arguments=['0','0','0','0','0','0','map','odom']
       )
 
-    # --- Bridge node: subscribes to /warehouse_robot/scan, publishes /warehouse_robot/pointcloud and /warehouse_robot/odom
-    warehouse_bridge = Node(
+    # --- Bridge node: subscribes to /warehouse_robot/scan, publishes /warehouse_robot/pointcloud
+    warehouse_scan_to_pointcloud = Node(
         package='warehouse_robot',
-        executable='warehouse_bridge',
-        name='warehouse_bridge',
+        executable='warehouse_scan_to_pointcloud',
+        name='warehouse_scan_to_pointcloud',
         output='screen',
         # Keep in global namespace; node explicitly uses the fully-qualified topic names.
         # If you prefer namespace scoping, adjust topics in the C++ node or add 'namespace' argument here.
     )
 
-    return LaunchDescription([gz, robot_state_pub, spawn, world_to_map_tf, map_to_odom_tf, warehouse_bridge])
+    return LaunchDescription([gz, robot_state_pub, spawn, world_to_map_tf, map_to_odom_tf, warehouse_scan_to_pointcloud])

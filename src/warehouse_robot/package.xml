@@ -17,7 +17,6 @@
   <build_depend>robot_state_publisher</build_depend>
   <build_depend>gazebo_ros</build_depend>
   <depend>sensor_msgs</depend>
-  <depend>nav_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>std_msgs</depend>
 
