@@ -43,11 +43,11 @@ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/include")
   )
 endif()
 
-add_executable(warehouse_bridge src/warehouse_bridge.cpp)
-ament_target_dependencies(warehouse_bridge rclcpp sensor_msgs nav_msgs geometry_msgs std_msgs)
+add_executable(warehouse_scan_to_pointcloud src/warehouse_scan_to_pointcloud.cpp)
+ament_target_dependencies(warehouse_scan_to_pointcloud rclcpp sensor_msgs geometry_msgs std_msgs)
 
 install(TARGETS
-  warehouse_bridge
+  warehouse_scan_to_pointcloud
   DESTINATION lib/${PROJECT_NAME}
 )
 

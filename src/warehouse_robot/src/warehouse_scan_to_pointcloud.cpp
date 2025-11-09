@@ -11,35 +11,23 @@
 #include "sensor_msgs/msg/point_field.hpp"
 #include "sensor_msgs/point_cloud2_iterator.hpp"
 
-#include "nav_msgs/msg/odometry.hpp"
-#include "geometry_msgs/msg/pose.hpp"
-#include "geometry_msgs/msg/twist.hpp"
-
 using std::placeholders::_1;
 
-class WarehouseBridge : public rclcpp::Node
+class WarehouseScanToPointcloud : public rclcpp::Node
 {
 public:
-  WarehouseBridge()
-  : Node("warehouse_bridge")
+  WarehouseScanToPointcloud()
+  : Node("warehouse_scan_to_pointcloud")
   {
     // subscribe to exact topic published by your gazebo plugin
     scan_sub_ = this->create_subscription<sensor_msgs::msg::LaserScan>(
       "/warehouse_robot/scan", 10,
-      std::bind(&WarehouseBridge::scan_callback, this, _1));
+      std::bind(&WarehouseScanToPointcloud::scan_callback, this, _1));
 
     pc_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(
       "/warehouse_robot/pointcloud", 10);
 
-    odom_pub_ = this->create_publisher<nav_msgs::msg::Odometry>(
-      "/warehouse_robot/odom", 10);
-
-    // publish odom at 20 Hz so topic always exists
-    odom_timer_ = this->create_wall_timer(
-      std::chrono::milliseconds(50),
-      std::bind(&WarehouseBridge::publish_fake_odom, this));
-
-    RCLCPP_INFO(this->get_logger(), "WarehouseBridge started: listening on /warehouse_robot/scan");
+    RCLCPP_INFO(this->get_logger(), "WarehouseScanToPointcloud started: listening on /warehouse_robot/scan");
   }
 
 private:
@@ -100,42 +88,14 @@ private:
     pc_pub_->publish(*cloud);
   }
 
-  void publish_fake_odom()
-  {
-    auto msg = nav_msgs::msg::Odometry();
-    msg.header.stamp = this->now();
-    msg.header.frame_id = "odom";                 // world frame
-    msg.child_frame_id = "robot_footprint";       // matches your gazebo diff drive robotBaseFrame
-
-    // For now we publish zeros; replace with real odom if you later compute it
-    msg.pose.pose.position.x = 0.0;
-    msg.pose.pose.position.y = 0.0;
-    msg.pose.pose.position.z = 0.0;
-    msg.pose.pose.orientation.x = 0.0;
-    msg.pose.pose.orientation.y = 0.0;
-    msg.pose.pose.orientation.z = 0.0;
-    msg.pose.pose.orientation.w = 1.0;
-
-    // Covariances optional: leave zeros or set reasonable defaults
-    // msg.pose.covariance = { ... };
-
-    msg.twist.twist.linear.x = 0.0;
-    msg.twist.twist.linear.y = 0.0;
-    msg.twist.twist.angular.z = 0.0;
-
-    odom_pub_->publish(msg);
-  }
-
   rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr scan_sub_;
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pc_pub_;
-  rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_pub_;
-  rclcpp::TimerBase::SharedPtr odom_timer_;
 };
 
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<WarehouseBridge>());
+  rclcpp::spin(std::make_shared<WarehouseScanToPointcloud>());
   rclcpp::shutdown();
   return 0;
 }

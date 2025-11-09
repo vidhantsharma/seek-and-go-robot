@@ -6,4 +6,7 @@ log/
 # ignore .vscode
 .vscode/
 
+# ignore frames
+frames*
+
 
