@@ -19,13 +19,12 @@ def generate_launch_description():
             FindExecutable(name='gazebo'),
             '--verbose',
             world,
-            '-s', 'libgazebo_ros_init.so',      # <--- ensure ROS init plugin is loaded
+            '-s', 'libgazebo_ros_init.so',
             '-s', 'libgazebo_ros_factory.so'
         ],
         shell=False
     )
 
-    # rest unchanged...
     xacro_file = PathJoinSubstitution([pkg_share, 'models', 'urdf', 'warehouse_robot.xacro'])
     meshes_dir = PathJoinSubstitution([pkg_share, 'models', 'meshes'])
     robot_description_command = Command([
