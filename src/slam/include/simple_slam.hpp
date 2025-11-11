@@ -1,7 +1,7 @@
 #ifndef SIMPLE_SLAM_HPP_
 #define SIMPLE_SLAM_HPP_
 
-#include "simple_slam_node.h"
+#include "simple_slam.h"
 
 #include <vector>
 #include <string>
@@ -60,6 +60,11 @@ public:
   nav_msgs::msg::OccupancyGrid toOccupancyGridMsg(const std::string &frame_id,
                                                   rclcpp::Time t) const;
 
+  int getWidth() const { return width_m_ / res_; };
+  int getHeight() const { return height_m_ / res_; };
+  double getResolution() const { return res_; };
+  void bresenham(int x0, int y0, int x1, int y1, std::vector<std::pair<int,int>> &cells) const;
+
 private:
   double width_m_, height_m_, res_;
   int w_, h_;
@@ -67,13 +72,19 @@ private:
   std::vector<double> log_odds_;
   double l_occ_, l_free_, l_min_, l_max_;
 
-  void bresenham(int x0, int y0, int x1, int y1, std::vector<std::pair<int,int>> &cells) const;
+  
 };
 
 /* ----------------------
    SimpleSlamNode
    ---------------------- */
 class SimpleSlamNode : public rclcpp::Node {
+
+  friend class SimpleSlamNodeTest;
+  friend class SimpleSlamNodeTest_ScanToPointsLocal_Test;
+  friend class SimpleSlamNodeTest_TransformPoints_Test;
+  friend class SimpleSlamNodeTest_TFPublication_Test;
+
 public:
   SimpleSlamNode();
   void initTF(); // call after making shared_ptr
