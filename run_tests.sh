@@ -1,19 +1,23 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
-# Optional: build everything quietly
 echo "🛠️  Building all packages..."
+# quiet build but still show colcon errors on failure
 colcon build > /dev/null
 
 echo -e "\n🧪 Running all GTest binaries in workspace:\n"
 
-# Find and run all test executables in build/ directories
-# (exclude non-executables and duplicates)
+mkdir -p test_results
 found=false
+
 while IFS= read -r test_bin; do
     found=true
-    echo "▶ $test_bin"
-    "$test_bin" --gtest_color=yes
+    name=$(basename "$test_bin")
+    # produce both console output and xml file (XML at test_results/<binary>.xml)
+    xmlfile="test_results/${name}.xml"
+    echo "▶ $test_bin  (xml -> $xmlfile)"
+    # run test and write xml (gtest) — some gtest variants accept --gtest_output
+    "$test_bin" --gtest_color=yes --gtest_output=xml:"$xmlfile"
 done < <(find build/ -type f -executable -name "test_*" | sort)
 
 if ! $found; then
@@ -22,7 +26,5 @@ fi
 
 echo -e "\n✅ All GTests executed.\n"
 
-# Optionally, also run colcon test for Python tests (pytest/unittest)
-# Uncomment if you also have Python-based tests
-# echo -e "🐍 Running Python tests via colcon...\n"
+# Optionally run colcon test for Python tests (uncomment if present)
 # colcon test --event-handlers console_direct+ && colcon test-result --verbose

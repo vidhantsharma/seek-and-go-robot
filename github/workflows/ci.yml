@@ -1,0 +1,58 @@
+name: PR — build & tests
+
+# Run for PRs targeting dev, and also on pushes to dev (optional)
+on:
+  pull_request:
+    branches: ["dev"]
+  push:
+    branches: ["dev"]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - name: Checkout repository (fetch full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # --- Install platform / build deps (customize as needed) ---
+      - name: Install build/test dependencies
+        shell: bash
+        run: |
+          sudo apt-get update -y
+          # common utilities; add your project's real deps here
+          sudo apt-get install -y python3-pip python3-colcon-common-extensions
+          pip3 install -U pytest
+
+      - name: Make test script executable
+        run: |
+          chmod +x ./run_tests.sh || true
+          # fallback if your script is tests.sh in repo root
+          chmod +x ./tests.sh || true
+
+      - name: Build & Run tests
+        # Fail the job if tests fail (set -e is in your script)
+        shell: bash
+        run: |
+          # prefer running the script you posted; change path if different
+          if [ -x "./run_tests.sh" ]; then
+            ./run_tests.sh
+          elif [ -x "./tests.sh" ]; then
+            ./tests.sh
+          else
+            echo "No test runner found at ./run_tests.sh or ./tests.sh"
+            exit 1
+          fi
+
+      - name: Upload test artifacts (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-artifacts
+          path: |
+            test_results/**
+            build/**/test_*.xml
+            /tmp/colcon_test_results || true
